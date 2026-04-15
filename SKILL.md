@@ -1,14 +1,13 @@
 ---
 name: web-access
+version: "2.4.1"
 license: MIT
-github: https://github.com/eze-is/web-access
-description: "所有联网操作必须通过此 skill 处理，包括：搜索、网页抓取、登录后操作、网络交互等。 Not for: social media content search (use all-net-search-read for WeChat/Xiaohongshu/Twitter/Bilibili); simple static page reading (use web_fetch). 触发场景：用户要求搜索信息、查看网页内容、访问需要登录的网站、操作网页界面、抓取社交媒体内容（小红书、微博、推特等）、读取动态渲染页面、以及任何需要真实浏览器环境的网络任务。"
-metadata:
-  author: 一泽Eze
-  version: "2.4.1"
+github: https://github.com/rrrrrredy/web-access
+description: "通用网页浏览与 CDP 浏览器自动化。触发词：打开网页、网页自动化、登录某网站、填写表单、操作页面、读取动态渲染、CDP、浏览器自动化。不适用：社交媒体平台内容搜索提取（公众号/小红书/推特/B站等请用 all-net-search-read）；简单网页内容读取（用 web_fetch）。"
+tags: [web, browser, automation, cdp, scraping]
 ---
 
-# web-access Skill
+# web-access 2.4.1
 
 ## 前置检查
 
@@ -260,3 +259,14 @@ updated: 2026-03-19
 
 > 同一工具/API 调用连续失败超过 **3 次**，立即停止。不再尝试。
 > 列出所有已尝试方案及失败原因，标记"需要人工介入"，等待用户确认后再继续。
+
+---
+
+## Changelog
+
+| 版本 | 日期 | 变更 |
+|------|------|------|
+| 2.4.1 | 2026-04-15 | Frontmatter 标准化（version 提升到顶层）；补 Changelog |
+| 2.3.0 | 2026-04-10 | CDP 模式增强；Gotchas + Hard Stop 章节 |
+| 2.0.0 | 2026-04-01 | 重构为目录结构；新增 references/ |
+| 1.0.0 | 2026-03-15 | 初始版本 |
