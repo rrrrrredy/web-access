@@ -2,9 +2,7 @@
 name: web-access
 license: MIT
 github: https://github.com/eze-is/web-access
-description:
-  所有联网操作必须通过此 skill 处理，包括：搜索、网页抓取、登录后操作、网络交互等。
-  触发场景：用户要求搜索信息、查看网页内容、访问需要登录的网站、操作网页界面、抓取社交媒体内容（小红书、微博、推特等）、读取动态渲染页面、以及任何需要真实浏览器环境的网络任务。
+description: "所有联网操作必须通过此 skill 处理，包括：搜索、网页抓取、登录后操作、网络交互等。 Not for: social media content search (use all-net-search-read for WeChat/Xiaohongshu/Twitter/Bilibili); simple static page reading (use web_fetch). 触发场景：用户要求搜索信息、查看网页内容、访问需要登录的网站、操作网页界面、抓取社交媒体内容（小红书、微博、推特等）、读取动态渲染页面、以及任何需要真实浏览器环境的网络任务。"
 metadata:
   author: 一泽Eze
   version: "2.4.1"
@@ -246,3 +244,19 @@ updated: 2026-03-19
 |------|---------|
 | `references/cdp-api.md` | 需要 CDP API 详细参考、JS 提取模式、错误处理时 |
 | `references/site-patterns/{domain}.md` | 确定目标网站后，读取对应站点经验 |
+
+---
+
+## Gotchas
+
+⚠️ **CDP 连接超时常见** → 首次连接或页面加载慢时容易超时，默认 30s timeout，复杂页面需调大。
+⚠️ **登录态不持久** → 每次新 session CDP 连接是全新的，之前的登录态不保留。
+⚠️ **反爬严格的站点会封** → 高频访问同一站点会触发反爬，建议间隔 2s 以上。
+⚠️ **动态渲染页面需等待** → SPA 页面 DOM 可能还没渲染完就被读取，用 `wait_for_selector` 确保元素就绪。
+
+---
+
+## Hard Stop
+
+> 同一工具/API 调用连续失败超过 **3 次**，立即停止。不再尝试。
+> 列出所有已尝试方案及失败原因，标记"需要人工介入"，等待用户确认后再继续。
