@@ -1,6 +1,6 @@
 # web-access
 
-Full internet access for AI agents — 3-layer channel scheduling + browser CDP + parallel divide-and-conquer.
+Full internet access for AI agents — CDP browser automation + web search + direct HTTP.
 
 > OpenClaw Skill — works with [OpenClaw](https://github.com/openclaw/openclaw) AI agents
 
@@ -27,7 +27,7 @@ git clone https://github.com/rrrrrredy/web-access.git ~/.openclaw/skills/web-acc
 ## Features
 
 - **CDP browser automation**: Full Chrome DevTools Protocol integration for dynamic page interaction
-- **3-layer channel scheduling**: CDP → web search → direct HTTP, automatic fallback
+- **3-layer channel selection**: CDP (dynamic pages) / web search (discovery) / direct HTTP (static) — selected per scenario
 - **Login-aware sessions**: Preserves authentication state across page navigations
 - **Site pattern matching**: Configurable per-site strategies for optimal extraction
 - **Dependency auto-check**: `check-deps.mjs` validates environment before operations
@@ -36,9 +36,10 @@ git clone https://github.com/rrrrrredy/web-access.git ~/.openclaw/skills/web-acc
 ## Usage
 
 Trigger phrases:
-- "打开网页"、"网页自动化"、"登录某网站"
-- "填写表单"、"操作页面"、"读取动态渲染"
-- "CDP"、"浏览器自动化"
+- "搜索信息"、"查看网页内容"、"访问需要登录的网站"
+- "操作网页界面"、"读取动态渲染页面"
+- "抓取社交媒体内容（小红书、微博、推特等）"
+- "任何需要真实浏览器环境的网络任务"
 
 ## Project Structure
 
@@ -55,6 +56,7 @@ web-access/
 ├── references/
 │   ├── cdp-api.md        # CDP API reference
 │   └── site-patterns/    # Per-site extraction configs
+│       └── .gitkeep
 └── .gitignore
 ```
 
