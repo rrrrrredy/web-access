@@ -1,10 +1,6 @@
 ---
 name: web-access
-version: "2.4.1"
-license: MIT
-github: https://github.com/rrrrrredy/web-access
-description: "通用网页浏览与 CDP 浏览器自动化。触发词：打开网页、网页自动化、登录某网站、填写表单、操作页面、读取动态渲染、CDP、浏览器自动化。不适用：社交媒体平台内容搜索提取（公众号/小红书/推特/B站等请用 all-net-search-read）；简单网页内容读取（用 web_fetch）。"
-tags: [web, browser, automation, cdp, scraping]
+description: Use when the user needs browser-based web access, dynamic page inspection, form filling, logged-in page navigation with explicit user intent, or Chrome CDP automation. Trigger for opening websites, interacting with pages, reading JavaScript-rendered content, CDP/browser automation, and page operations. Not for simple static fetches, social-media extraction better handled by dedicated skills, credential/cookie/password reading, payment actions, or bypassing access controls.
 ---
 
 # web-access 2.4.1
@@ -21,10 +17,10 @@ node "$CLAUDE_SKILL_DIR/scripts/check-deps.mjs"
 - **Node.js 22+**：必需（使用原生 WebSocket）。版本低于 22 可用但需安装 `ws` 模块。
 - **Chrome remote-debugging**：在 Chrome 地址栏打开 `chrome://inspect/#remote-debugging`，勾选 **"Allow remote debugging for this browser instance"** 即可，可能需要重启浏览器。
 
-检查通过后并必须在回复中向用户直接展示以下须知，再启动 CDP Proxy 执行操作：
+检查通过后并必须在回复中向用户直接展示以下须知；如果任务需要使用用户登录态、提交表单、写入数据或访问可能包含个人信息的页面，先取得用户明确确认，再启动 CDP Proxy 执行操作：
 
 ```
-温馨提示：部分站点对浏览器自动化操作检测严格，存在账号封禁风险。已内置防护措施但无法完全避免，Agent 继续操作即视为接受。
+温馨提示：部分站点对浏览器自动化操作检测严格，存在账号封禁风险。涉及登录态、表单提交、账号操作或个人信息页面时，请确认是否继续。
 ```
 
 ## 浏览哲学
@@ -60,8 +56,10 @@ node "$CLAUDE_SKILL_DIR/scripts/check-deps.mjs"
 进入浏览器层后，`/eval` 就是你的眼睛和手：
 
 - **看**：用 `/eval` 查询 DOM，发现页面上的链接、按钮、表单、文本内容——相当于「看看这个页面有什么」
-- **做**：用 `/click` 点击元素、`/scroll` 滚动加载、`/eval` 填表提交——像人一样在页面内自然导航
+- **做**：用 `/click` 点击元素、`/scroll` 滚动加载、`/eval` 填写草稿或读取控件状态——像人一样在页面内自然导航；提交、保存、上传、删除等副作用动作前必须再次确认
 - **读**：用 `/eval` 提取文字内容，判断图片/视频是否承载核心信息——是则提取媒体 URL 定向读取或 `/screenshot` 视觉识别
+
+`/eval` 默认只做只读 DOM 查询、可见内容提取、控件状态读取和用户明确要求的局部草稿填写。不得用 `/eval` 读取 cookie/token/localStorage 中的敏感值，不得构造隐藏网络请求，不得绕过页面权限检查；任何会改变远端状态的 JS、表单提交、上传、删除、授权或账号操作，都要先向用户确认具体动作。
 
 浏览网页时，**先了解页面结构，再决定下一步动作**。不需要提前规划所有步骤。
 
@@ -80,6 +78,23 @@ node "$CLAUDE_SKILL_DIR/scripts/check-deps.mjs"
 
 通过 CDP Proxy 直连用户日常 Chrome，天然携带登录态，无需启动独立浏览器。
 若无用户明确要求，不主动操作用户已有 tab，所有操作都在自己创建的后台 tab 中进行，保持对用户环境的最小侵入。不关闭用户 tab 的前提下，完成任务后关闭自己创建的 tab，保持环境整洁。
+
+### 隐私与权限边界
+
+- 不读取、提取、记录或转述 cookie、密码、验证码、支付信息、私信、通讯录、个人身份资料或其他与任务无关的敏感字段。
+- 不绕过登录墙、付费墙、风控、访问控制、地理限制或平台反自动化策略。
+- 不执行付款、下单、转账、发帖、发信、删除、授权、账号设置修改等有副作用操作，除非用户刚刚明确要求并确认具体动作。
+- 如果页面暴露了超出任务所需的私人信息，只提取完成任务所需的最小字段，并在结果中说明已最小化读取范围。
+- 任何网站自身条款、风控提示或安全验证优先于本 skill 的自动化便利性。
+
+### Hard Stop
+
+立即停止并向用户说明需要人工确认的情况：
+
+- 页面要求输入密码、验证码、支付信息或二次验证。
+- 任务目标需要读取 cookie、token、私信、通讯录、付款页面或账号安全设置。
+- 网站明确拒绝自动化访问，或连续三次 CDP 操作都触发风控、封禁、验证码或权限错误。
+- 用户请求绕过访问控制、批量抓取受限内容、伪装身份或规避平台限制。
 
 ### 启动
 
@@ -119,7 +134,7 @@ curl -s -X POST "http://localhost:3456/click?target=ID" -d 'button.submit'
 # 真实鼠标点击 — CDP Input.dispatchMouseEvent，算用户手势，能触发文件对话框
 curl -s -X POST "http://localhost:3456/clickAt?target=ID" -d 'button.upload'
 
-# 文件上传 — 直接设置 file input 的本地文件路径，绕过文件对话框
+# 文件上传 — 仅在用户明确要求上传该文件时，设置 file input 的本地文件路径
 curl -s -X POST "http://localhost:3456/setFiles?target=ID" -d '{"selector":"input[type=file]","files":["/path/to/file.png"]}'
 
 # 滚动（触发懒加载）
@@ -217,7 +232,7 @@ Proxy 持续运行，不建议主动停止——重启后需要在 Chrome 中重
 
 确定目标网站后，如果上方列表中有匹配的站点，必须读取对应文件获取先验知识（平台特征、有效模式、已知陷阱）。经验内容标注了发现日期，当作可能有效的提示而非保证——如果按经验操作失败，回退通用模式并更新经验文件。
 
-CDP 操作成功完成后，如果发现了有必要记录经验的新站点或新模式（URL 结构、平台特征、操作策略），主动写入对应的站点经验文件。只写经过验证的事实，不写未确认的猜测。
+CDP 操作成功完成后，如果发现了有必要记录经验的新站点或新模式（URL 结构、平台特征、操作策略），先向用户说明准备记录的域名和要点；只有在用户确认后，才写入对应的站点经验文件。只写经过验证的事实，不写未确认的猜测。
 
 文件格式：
 ```markdown
