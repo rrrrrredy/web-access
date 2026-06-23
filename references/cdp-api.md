@@ -64,13 +64,13 @@ curl -s -X POST "http://localhost:3456/click?target=ID" -d 'button.submit'
 ```
 
 ### POST /clickAt?target=ID
-CDP 浏览器级真实鼠标点击（`Input.dispatchMouseEvent`），POST body 为 CSS 选择器。先获取元素坐标，再模拟鼠标按下/释放。算真实用户手势，能触发文件对话框、绕过部分反自动化检测。
+CDP 浏览器级鼠标点击（`Input.dispatchMouseEvent`），POST body 为 CSS 选择器。先获取元素坐标，再模拟鼠标按下/释放。用于需要真实点击语义的控件，例如文件选择按钮；不得用于规避访问控制、风控或平台反自动化策略。
 ```bash
 curl -s -X POST "http://localhost:3456/clickAt?target=ID" -d 'button.upload'
 ```
 
 ### POST /setFiles?target=ID
-给 file input 设置本地文件路径（`DOM.setFileInputFiles`），完全绕过文件对话框。POST body 为 JSON。
+在用户明确要求上传指定本地文件时，给 file input 设置本地文件路径（`DOM.setFileInputFiles`），无需打开操作系统文件对话框。POST body 为 JSON。
 ```bash
 curl -s -X POST "http://localhost:3456/setFiles?target=ID" -d '{"selector":"input[type=file]","files":["/path/to/file1.png","/path/to/file2.png"]}'
 ```
